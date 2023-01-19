@@ -10,8 +10,7 @@ typedef enum {
 typedef struct
 {
 	int x, y;
-	int count;
-	Direction direction;
+
 } Bullet;
 
 
@@ -19,6 +18,7 @@ typedef struct
 {
 	int x, y;
 	int size;
+	int countBullets;
 	Direction direction;
 	Bullet bullets[MAX_BULLETS_FOR_SHIP];
 } Ship;

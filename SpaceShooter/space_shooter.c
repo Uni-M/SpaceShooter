@@ -92,6 +92,7 @@ void InitShip()
 	ship.y = FIELD_HIGHT - 2;
 	ship.size = 3;
 	ship.direction = UP;
+	ship.countBullets = 0;
 }
 
 void AddShipToField()
@@ -121,20 +122,32 @@ void MoveRight()
 
 void Shoot()
 {
-	ship.bullets[0].x = ship.x + 1;
-	ship.bullets[0].y = ship.y - 1;
-	ship.bullets->count += 1;
-	ship.bullets->direction = UP;
+	if (ship.countBullets < MAX_BULLETS_FOR_SHIP)
+	{
+		ship.countBullets += 1;
+		ship.bullets[ship.countBullets - 1].x = ship.x + 1;
+		ship.bullets[ship.countBullets - 1].y = ship.y - 1;
+		ship.direction = UP;
+	}
 }
 
 void AddBulletToField()
 {
-	if (ship.bullets->direction == UP) field[ship.bullets[0].y][ship.bullets[0].x] = '^';
+	for (int i = 0; i <= ship.countBullets - 1; ++i)
+	{
+		if (ship.direction == UP) field[ship.bullets[i].y][ship.bullets[i].x] = '^';
+	}
+	
 }
 
 void BulletMoves()
 {
-	ship.bullets[0].y--;
+	for (int i = ship.countBullets - 1; i >= 0; --i)
+	{
+		if (ship.bullets[i].y > 1) ship.bullets[i].y--;
+		else if (ship.bullets[i].y == 1) ship.countBullets--;
+	}
+
 }
 
 void hidecursor(HANDLE consoleHandle)
