@@ -1,6 +1,9 @@
 #pragma once
 
 #define MAX_BULLETS_FOR_SHIP 25
+#define DEFAULT_COUNT_ENEMY_SHIP 3
+#define MAX_ENEMY_SHIP_AT_LINE 7
+
 
 typedef enum {
 	UP,

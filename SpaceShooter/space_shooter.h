@@ -17,7 +17,7 @@
 #define watchF(f) printf("#f is %g\n", f)
 #define watchCh(ch) printf("#ch is %c\n", ch)
 
-#define FIELD_WIDTH 55
+#define FIELD_WIDTH 45
 #define FIELD_HIGHT 25
 
 void InitField();
@@ -30,6 +30,13 @@ void MoveRight();
 void Shoot();
 void BulletMoves();
 void AddBulletToField();
+
+void InitEnemys(int countEnemys);
+void NewEnemys(int* countEnemys);
+void AddEnemysToField(int countEnemys);
+void EnemysMoves(int countEnemys, bool* inGame);
+
+void CheckHit(bool* inGame, int* score, int* countEnemys);
 
 void hidecursor(HANDLE consoleHandle);
 void setcur(int x, int y);

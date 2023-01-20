@@ -3,7 +3,7 @@
 char field[FIELD_HIGHT + 1][FIELD_WIDTH + 1];
 
 Ship ship;
-Ship enemys[];
+Ship* enemys;
 
 int main()
 {
@@ -13,20 +13,34 @@ int main()
 
 	int score = 0;
 	int maxScore = 0;
+	int countEnemys = DEFAULT_COUNT_ENEMY_SHIP;
 	bool inGame = true;
 	bool pause = false;
 	
-	//clock_t now = clock(), diff;
+	clock_t start = clock(), diff;
 
 	
 	InitShip();
-	
+	InitEnemys(countEnemys);	
 
 	while (inGame)
 	{
 		InitField();
 		AddShipToField();
 		AddBulletToField();
+
+		AddEnemysToField(countEnemys);
+
+		diff = clock() - start;
+
+		if (diff > 1000)
+		{
+			EnemysMoves(countEnemys, &inGame);
+			if((int)rand() % 3 == 0) NewEnemys(&countEnemys);
+			start = clock();
+		}
+		BulletMoves();
+
 		PrintField(score, maxScore);
 
 		if (pause)
@@ -43,9 +57,11 @@ int main()
 		else if (c == 'w')             Shoot();
 		else if (c == VK_SPACE)	       pause = !pause;
 
-		BulletMoves();
+		
 
-		Sleep(10);
+		CheckHit(&inGame, &score, &countEnemys);
+
+		Sleep(200);
 		setcur(0, 0);
 	}
 	return 0;
@@ -133,11 +149,10 @@ void Shoot()
 
 void AddBulletToField()
 {
-	for (int i = 0; i <= ship.countBullets - 1; ++i)
+	for (int i = 0; i < ship.countBullets; ++i)
 	{
 		if (ship.direction == UP) field[ship.bullets[i].y][ship.bullets[i].x] = '^';
 	}
-	
 }
 
 void BulletMoves()
@@ -147,6 +162,95 @@ void BulletMoves()
 		if (ship.bullets[i].y > 1) ship.bullets[i].y--;
 		else if (ship.bullets[i].y == 1) ship.countBullets--;
 	}
+}
+
+void InitEnemys(int countEnemys)
+{
+	if ((enemys = (Ship*)malloc(sizeof(Ship) * countEnemys)) != NULL)
+	{
+		for (int i = 0; i < countEnemys; ++i)
+		{
+			enemys[i].size = (int)rand() % 3 + 2;
+			enemys[i].direction = DOWN;
+			enemys[i].countBullets = 0;
+			enemys[i].x = (int)rand() % (FIELD_WIDTH - 3) + 1;
+			enemys[i].y = 1;
+		}
+	}
+}
+
+void NewEnemys(int* countEnemys)
+{
+	int moreEnemis = *countEnemys + (int)rand() % 3;
+	enemys = realloc(enemys, sizeof(Ship) * moreEnemis);
+	if (enemys != NULL)
+	{
+		for (int i = *countEnemys; i < moreEnemis; ++i)
+		{
+			enemys[i].size = (int)rand() % 3 + 2;
+			enemys[i].direction = DOWN;
+			enemys[i].countBullets = 0;
+			enemys[i].x = (int)rand() % (FIELD_WIDTH - 3) + 1;
+			enemys[i].y = 1;
+		}
+	}
+
+	*countEnemys = moreEnemis;
+}
+
+void AddEnemysToField(int countEnemys)
+{
+	for (int i = 0; i < countEnemys; ++i)
+	{
+		for (int j = enemys[i].x; j < enemys[i].x + enemys[i].size; ++j)
+		{
+			if (j % 2 == 0) field[enemys[i].y][j] = 'v';
+			else field[enemys[i].y][j] = 'V';
+		}
+	}
+}
+
+void EnemysMoves(int countEnemys, bool* inGame)
+{
+	for (int i = 0; i < countEnemys; ++i)
+	{
+		enemys[i].y++;
+		if (enemys[i].y > ship.y) *inGame = false;
+	}
+}
+
+void CheckHit(bool* inGame, int* score, int* countEnemys)
+{
+	for (int i = 0; i < *countEnemys; ++i)
+	{
+		for (int j = enemys[i].x; j < enemys[i].x + enemys[i].size; j++)
+		{
+			if (field[enemys[i].y][j] == '^')
+			{
+				enemys[i].size = 0;
+				//for .... ship.bullets[i]..... найти в цикле пулю которая попала и удалить её
+			}
+		}
+	}
+	watchI(*countEnemys);
+	for (int i = 0; i < *countEnemys; ++i)
+	{
+		
+		if (enemys[i].size == 0 && i + 1 < *countEnemys)
+		{
+			*score += 1;
+			enemys[i] = enemys[i + 1];
+			--i;
+			*countEnemys -= 1;
+		}
+		else if (enemys[i].size == 0 && i + 1 == *countEnemys)
+		{
+			*score += 1;
+			*countEnemys -= 1;
+		}
+	}
+	watchI(*countEnemys);
+	enemys = realloc(enemys, sizeof(Ship) * (*countEnemys));
 
 }
 
